@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leitor de CSV com Suporte a Codificações</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 5px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    .error {
+      color: red;
+    }
+    .controls {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Leitor de CSV</h2>
+
+<div class="controls">
+  <input type="file" id="csvFile" accept=".csv,.txt">
+  <label for="encoding">Codificação:</label>
+  <select id="encoding">
+    <option value="utf-8">UTF-8</option>
+    <option value="windows-1252">Windows-1252</option>
+    <option value="iso-8859-1">ISO-8859-1</option>
+  </select>
+  <button onclick="processarCSV()">Ler Arquivo CSV</button>
+</div>
+
+<div id="erro" class="error"></div>
+<div id="resultado"></div>
+
+<script>
+  function detectDelimiter(linha) {
+    const countComma = (linha.match(/,/g) || []).length;
+    const countSemicolon = (linha.match(/;/g) || []).length;
+    return countSemicolon > countComma ? ';' : ',';
+  }
+
+  function processarCSV() {
+    const input = document.getElementById('csvFile');
+    const encoding = document.getElementById('encoding').value;
+    const erroDiv = document.getElementById('erro');
+    const resultado = document.getElementById('resultado');
+
+    erroDiv.textContent = '';
+    resultado.innerHTML = '';
+
+    if (!input.files || input.files.length === 0) {
+      erroDiv.textContent = 'Por favor, selecione um arquivo CSV.';
+      return;
+    }
+
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const arrayBuffer = e.target.result;
+      const decoder = new TextDecoder(encoding);
+      const conteudo = decoder.decode(arrayBuffer);
+
+      const linhas = conteudo.split(/\r\n|\n/).filter(Boolean);
+      if (linhas.length === 0) {
+        erroDiv.textContent = 'Arquivo CSV vazio ou inválido.';
+        return;
+      }
+
+      const delimitador = detectDelimiter(linhas[0]);
+      const cabecalho = linhas[0].split(delimitador).map(campo => campo.trim());
+      const dados = linhas.slice(1).map(linha => linha.split(delimitador).map(campo => campo.trim()));
+
+      let html = '<table>';
+      html += '<tr>' + cabecalho.map((campo, i) => `<th>${campo} (${i})</th>`).join('') + '</tr>';
+      dados.forEach(linha => {
+        html += '<tr>' + linha.map(campo => `<td>${campo}</td>`).join('') + '</tr>';
+      });
+      html += '</table>';
+
+      resultado.innerHTML = html;
+    };
+
+    reader.onerror = function () {
+      erroDiv.textContent = 'Erro ao ler o arquivo.';
+    };
+
+    reader.readAsArrayBuffer(file);
+  }
+</script>
+
+</body>
+</html>
