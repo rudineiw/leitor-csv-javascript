@@ -52,6 +52,12 @@ Este projeto é livre para uso educacional e pode ser modificado conforme necess
 
 ---
 
+## 🌐 Teste online
+
+[https://rudineiw.github.io/leitor-csv-javascript/](https://rudineiw.github.io/leitor-csv-javascript/)
+
+---
+
 ## ✍️ Autor
 
 🔗 GitHub: [github.com/rudineiw](https://github.com/rudineiw)
